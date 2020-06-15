@@ -14,7 +14,7 @@ ext {
     androidTargetSdkVersion = 28
     androidCompileSdkVersion = 28
 
-    supportLibraryVersion = '1.1.0-alpha05'
+    supportLibraryVersion = '1.1.0'
     otherVersion = '1.0.0'
 
 
@@ -33,9 +33,9 @@ ext {
 
     imageLoader = '4.9.0'
 
-    gsyVideoVersion = '7.0.2'
+    gsyVideoVersion = '7.1.4'
 
-    exo_player2 = '2.10.1'
+    exo_player2 = '2.11.3'
 
     permissionsdispatcher = '4.3.0'
 

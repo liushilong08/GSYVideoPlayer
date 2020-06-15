@@ -1,16 +1,27 @@
 package com.example.gsyvideoplayer;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.ParcelFileDescriptor;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.example.gsyvideoplayer.video.LandLayoutVideo;
 import com.google.android.exoplayer2.SeekParameters;
+import com.google.android.exoplayer2.upstream.RawResourceDataSource;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.listener.GSYSampleCallBack;
 import com.shuyu.gsyvideoplayer.listener.GSYVideoProgressListener;
@@ -23,6 +34,8 @@ import com.shuyu.gsyvideoplayer.utils.Debuger;
 import com.shuyu.gsyvideoplayer.utils.OrientationUtils;
 
 
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +60,10 @@ public class DetailPlayer extends AppCompatActivity {
     @BindView(R.id.activity_detail_player)
     RelativeLayout activityDetailPlayer;
 
+    @BindView(R.id.open_btn)
+    Button button;
+
+
     private boolean isPlay;
     private boolean isPause;
 
@@ -58,7 +75,7 @@ public class DetailPlayer extends AppCompatActivity {
         setContentView(R.layout.activity_detail_player);
         ButterKnife.bind(this);
 
-        String url =  getUrl();
+        String url = getUrl();
 
         //detailPlayer.setUp(url, false, null, "测试视频");
         //detailPlayer.setLooping(true);
@@ -82,6 +99,14 @@ public class DetailPlayer extends AppCompatActivity {
 //        list.add(videoOptionModel2);
 //        GSYVideoManager.instance().setOptionModelList(list);
 
+
+        /// ijk rtmp
+       /*VideoOptionModel videoOptionModel =
+                new VideoOptionModel(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "protocol_whitelist", "crypto,file,http,https,tcp,tls,udp,rtmp,rtsp");
+        List<VideoOptionModel> list = new ArrayList<>();
+        list.add(videoOptionModel);
+        GSYVideoManager.instance().setOptionModelList(list);*/
+
         //增加封面
         ImageView imageView = new ImageView(this);
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -96,13 +121,19 @@ public class DetailPlayer extends AppCompatActivity {
         //初始化不打开外部的旋转
         orientationUtils.setEnable(false);
 
+        /**仅仅横屏旋转，不变直*/
+        //orientationUtils.setOnlyRotateLand(true);
+
         Map<String, String> header = new HashMap<>();
         header.put("ee", "33");
         header.put("allowCrossProtocolRedirects", "true");
+        header.put("User-Agent", "GSY");
         GSYVideoOptionBuilder gsyVideoOption = new GSYVideoOptionBuilder();
         gsyVideoOption.setThumbImageView(imageView)
                 .setIsTouchWiget(true)
                 .setRotateViewAuto(false)
+                //仅仅横屏旋转，不变直
+                //.setOnlyRotateLand(true)
                 .setLockLand(false)
                 .setAutoFullWithSize(false)
                 .setShowFullAnimation(false)
@@ -122,7 +153,7 @@ public class DetailPlayer extends AppCompatActivity {
                         isPlay = true;
 
                         //设置 seek 的临近帧。
-                        if(detailPlayer.getGSYVideoManager().getPlayer() instanceof Exo2PlayerManager) {
+                        if (detailPlayer.getGSYVideoManager().getPlayer() instanceof Exo2PlayerManager) {
                             ((Exo2PlayerManager) detailPlayer.getGSYVideoManager().getPlayer()).setSeekParameter(SeekParameters.NEXT_SYNC);
                             Debuger.printfError("***** setSeekParameter **** ");
                         }
@@ -182,6 +213,13 @@ public class DetailPlayer extends AppCompatActivity {
                 detailPlayer.startWindowFullscreen(DetailPlayer.this, true, true);
             }
         });
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fileSearch();
+            }
+        });
     }
 
     @Override
@@ -224,7 +262,6 @@ public class DetailPlayer extends AppCompatActivity {
     }
 
 
-
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -243,19 +280,23 @@ public class DetailPlayer extends AppCompatActivity {
 
     private GSYVideoPlayer getCurPlay() {
         if (detailPlayer.getFullWindowPlayer() != null) {
-            return  detailPlayer.getFullWindowPlayer();
+            return detailPlayer.getFullWindowPlayer();
         }
         return detailPlayer;
     }
-
-
 
 
     private String getUrl() {
 
         //String url = "android.resource://" + getPackageName() + "/" + R.raw.test;
         //注意，用ijk模式播放raw视频，这个必须打开
-        //GSYVideoManager.instance().enableRawPlay(getApplicationContext());
+        GSYVideoManager.instance().enableRawPlay(getApplicationContext());
+
+        ///exo 播放 raw
+        //String url = "rawresource://" + getPackageName() + "/" + R.raw.test;
+
+        ///exo raw 支持
+        //String url =  RawResourceDataSource.buildRawResourceUri(R.raw.test).toString();
 
         //断网自动重新链接，url前接上ijkhttphook:
         //String url = "ijkhttphook:https://res.exexm.com/cw_145225549855002";
@@ -275,7 +316,13 @@ public class DetailPlayer extends AppCompatActivity {
 
         //String url =  "http://video.7k.cn/app_video/20171202/6c8cf3ea/v.m3u8.mp4";
         //String url =  "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8";
-        String url =  "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f20.mp4";
+        //String url = "rtmp://ctc-zhenjiang04.rt1.gensee.com/5324e855b28b453db7b0ec226598b76c_171391_0_8801038305_1591077225_205d01b8/video";
+        String url = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f20.mp4";
+        //String url = "https://pointshow.oss-cn-hangzhou.aliyuncs.com/McTk51586843620689.mp4";
+        //String url = "http://pointshow.oss-cn-hangzhou.aliyuncs.com/transcode/ORIGINAL/Mnbc61586842828593.mp4";
+        //ssl error
+        //String url =  "https://file.shftz.cn:8443/filesystem/download/10/2019/3/26/ce2c7c66-e9eb-42be-adf6-f9008385ea8c.mov/play";
+        //String url =  "https://us-4.wl-cdn.com/hls/20200225/fde4f8ef394731f38d68fe6d601cfd56/index.m3u8";
         //String url =  "https://cdn61.ytbbs.tv/cn/tv/55550/55550-1/play.m3u8?md5=v4sI4lWlo4XojzeAjgBGaQ&expires=1521204012&token=55550";
         //String url =  "http://1253492636.vod2.myqcloud.com/2e5fc148vodgzp1253492636/d08af82d4564972819086152830/plHZZoSkje0A.mp4";
 
@@ -298,6 +345,43 @@ public class DetailPlayer extends AppCompatActivity {
         //String url = "http://hls.ciguang.tv/hdtv/video.m3u8";
         //String url = "https://res.exexm.com/cw_145225549855002";
         //String url = "http://storage.gzstv.net/uploads/media/huangmeiyan/jr05-09.mp4";//mepg
+        //String url = "https://zh-files.oss-cn-qingdao.aliyuncs.com/20170808223928mJ1P3n57.mp4";//90度
         return url;
+    }
+
+    private static final int READ_REQUEST_CODE = 42;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (data == null || resultCode != Activity.RESULT_OK) return;
+        if (requestCode == READ_REQUEST_CODE) {
+            getPathForSearch(data.getData());
+        }
+    }
+
+
+    private void getPathForSearch(Uri uri) {
+        String[] selectionArgs = new String[]{DocumentsContract.getDocumentId(uri).split(":")[1]};
+        Cursor cursor = getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                null, MediaStore.Images.Media._ID + "=?",
+                selectionArgs, null);
+        if (null != cursor) {
+            if (cursor.moveToFirst()) {
+                int index = cursor.getColumnIndex(MediaStore.Video.Media.DATA);
+                if (index > -1) {
+                    detailPlayer.setUp(uri.toString(), false, "File");
+                    detailPlayer.startPlayLogic();
+                }
+            }
+            cursor.close();
+        }
+    }
+
+    protected void fileSearch() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("video/*");
+        startActivityForResult(intent, READ_REQUEST_CODE);
     }
 }

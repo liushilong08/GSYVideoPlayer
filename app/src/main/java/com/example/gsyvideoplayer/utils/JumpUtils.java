@@ -2,16 +2,20 @@ package com.example.gsyvideoplayer.utils;
 
 import android.app.Activity;
 import android.content.Intent;
+
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.util.Pair;
+
 import android.view.View;
 
+import com.example.gsyvideoplayer.AudioDetailPlayer;
 import com.example.gsyvideoplayer.AutoPlayRecyclerViewActivity;
 import com.example.gsyvideoplayer.DanmkuVideoActivity;
 import com.example.gsyvideoplayer.DetailADPlayer;
 import com.example.gsyvideoplayer.DetailADPlayer2;
 import com.example.gsyvideoplayer.DetailControlActivity;
+import com.example.gsyvideoplayer.DetailDownloadPlayer;
 import com.example.gsyvideoplayer.DetailFilterActivity;
 import com.example.gsyvideoplayer.DetailListPlayer;
 import com.example.gsyvideoplayer.DetailMoreTypeActivity;
@@ -34,6 +38,7 @@ import com.example.gsyvideoplayer.ScrollingActivity;
 import com.example.gsyvideoplayer.WebDetailActivity;
 import com.example.gsyvideoplayer.WindowActivity;
 import com.example.gsyvideoplayer.exo.DetailExoListPlayer;
+import com.example.gsyvideoplayer.exosubtitle.GSYExoSubTitleDetailPlayer;
 import com.example.gsyvideoplayer.switchplay.SwitchListVideoActivity;
 
 /**
@@ -223,8 +228,6 @@ public class JumpUtils {
     }
 
 
-
-
     /**
      * 跳转到详情播放
      *
@@ -260,11 +263,41 @@ public class JumpUtils {
      *
      * @param activity
      */
+    public static void goToDetailDownloadActivity(Activity activity) {
+        Intent intent = new Intent(activity, DetailDownloadPlayer.class);
+        activity.startActivity(intent);
+    }
+
+    /**
+     * 跳转到详情播放
+     *
+     * @param activity
+     */
+    public static void goToGSYExoSubTitleDetailPlayer(Activity activity) {
+        Intent intent = new Intent(activity, GSYExoSubTitleDetailPlayer.class);
+        activity.startActivity(intent);
+    }
+
+    /**
+     * 跳转到详情播放
+     *
+     * @param activity
+     */
+    public static void goToDetailAudioActivity(Activity activity) {
+        Intent intent = new Intent(activity, AudioDetailPlayer.class);
+        activity.startActivity(intent);
+    }
+
+
+    /**
+     * 跳转到详情播放
+     *
+     * @param activity
+     */
     public static void goToDetailExoListPlayer(Activity activity) {
         Intent intent = new Intent(activity, DetailExoListPlayer.class);
         activity.startActivity(intent);
     }
-
 
 
     /**
@@ -276,8 +309,6 @@ public class JumpUtils {
         Intent intent = new Intent(activity, DetailADPlayer2.class);
         activity.startActivity(intent);
     }
-
-
 
 
     /**
