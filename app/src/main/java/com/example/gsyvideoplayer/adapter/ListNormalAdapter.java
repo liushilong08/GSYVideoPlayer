@@ -152,8 +152,9 @@ public class ListNormalAdapter extends BaseAdapter {
         holder.gsyVideoPlayer.setRotateViewAuto(!getListNeedAutoLand());
         holder.gsyVideoPlayer.setLockLand(!getListNeedAutoLand());
         holder.gsyVideoPlayer.setPlayTag(TAG);
-        //holder.gsyVideoPlayer.setAutoFullWithSize(true);
+        //holder.gsyVideoPlayer.c(true);
         holder.gsyVideoPlayer.setReleaseWhenLossAudio(false);
+        holder.gsyVideoPlayer.setAutoFullWithSize(true);
         holder.gsyVideoPlayer.setShowFullAnimation(!getListNeedAutoLand());
         holder.gsyVideoPlayer.setIsTouchWiget(false);
         //循环
@@ -298,6 +299,9 @@ public class ListNormalAdapter extends BaseAdapter {
         orientationUtils.setEnable(true);
     }
 
+    /**
+     * orientationUtils 和  detailPlayer.onConfigurationChanged 方法是用于触发屏幕旋转的
+     */
     public void onConfigurationChanged(Activity activity, Configuration newConfig) {
         //如果旋转了就全屏
         if (isPlay && itemPlayer != null && orientationUtils != null) {
